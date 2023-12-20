@@ -1,0 +1,91 @@
+<html>
+
+<head>
+	<meta name=viewport content="width=device-width, initial-scale=1, user-scalable=0">
+	<meta charset="utf-8" />
+	<link rel="stylesheet" href="css/core.css">
+	<link rel="stylesheet" href="css/main.css">
+	<script src="js/jquery-3.7.1.min.js"></script>
+	<script src="js/core.js"></script>
+	<script>
+		$(document).ready(function () {
+			Page.init(start, "feedView.html");
+		});
+		var fd = null;
+		var id = null;
+		function start(uid, feed) {
+			fd = feed;
+			id = uid;
+			$("#content").append(getFeedCode(feed));
+		}
+		function getFeedCode(feed) {
+			var name = feed.name;
+			var str = "<div class='feed'>";
+			str += "<div class='author'>";
+			if (feed.image == null) {
+				str += "<div class='photo' onclick='showInfo()'></div>";
+			}
+			else {
+				var imgurl = "images/" + feed.image;
+				str += "<div class='photo' onclick='showInfo()' style='background-image: url(\"" + imgurl + "\")'></div>";
+			}
+			str += "<div class='name' onclick='showInfo(" + feed.id + ")'>" + name + "</div>";
+			str += "<div class='ts'>" + feed.ts + "</div>"
+			str += "</div>";
+			if (feed.images != null) {
+				var imgurl = "images/" + feed.images;
+				str += "<div class='image' style='background-image: url(\"" + imgurl + "\")'></div>";
+			}
+			str += "<div class='text_full'>" + feed.content + "</div>";
+			if (feed.id == id) {
+				$(".page-mnu").append("<div class=\"menu\" style=\"float: right;\" onclick=\"goUpdate()\">글수정</div>");
+				$(".page-mnu").append("<div class=\"menu\" style=\"float: right;\" onclick=\"feedRemove()\">글삭제</div>");
+			} else {
+				$(".page-mnu").append("<div class=\"menu\" style=\"float: right;\" onclick=\"feedReport()\">글신고</div>");
+			}
+			return str;
+		}
+		function showInfo() {
+			Page.go("userInfo.html", fd);
+		}
+		function goUpdate() {
+			Page.go("feedUpdate.html", fd);
+		}
+		function feedRemove() {
+			if (confirm("정말 삭제 하시겠습니까?") == true) {
+				AJAX.call("jsp/feedRemove.jsp", {no: fd.no}, function (data) {
+					var code = data.trim();
+					if (code == "ER") {
+						alert("글 삭제 중 오류가 발생하였습니다.");
+					}
+					else {
+						alert("글 삭제가 완료되었습니다.");
+						window.location.href = "main.html";
+					}
+				});
+			}
+		}
+		function feedReport() {
+			alert("글 신고가 완료되었습니다.");
+			window.location.href = "main.html";
+		}
+	</script>
+	<style>
+	</style>
+</head>
+
+<body>
+	<div class="page-hdr">
+		<div style="position: absolute; float: left; margin-top: 2px;" onclick="window.history.back();">
+			<img src="images/back.png" width="48" height="48">
+		</div>
+		MySNS
+	</div>
+	<div class="page-body">
+		<div class="page-mnu"></div>
+		<div id="content" class="section"></div>
+	</div>
+	<div class="page-footer">Copyright: mysns.com, 202x</div>
+</body>
+
+</html>
